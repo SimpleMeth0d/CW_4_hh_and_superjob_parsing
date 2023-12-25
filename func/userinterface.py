@@ -1,5 +1,7 @@
 from src.classes_api import HeadHunter, Super_job
+from src.class_save_to_file import JsonSaveFile
 import json
+import os
 
 
 def job_vacancy():
@@ -14,6 +16,7 @@ def job_vacancy():
     page = int(input('Введите страницу: '))
     hh_instance = HeadHunter(name, page, per_page)
     sj_instance = Super_job(name, page, per_page)
+    json_file = JsonSaveFile('vacancies')
     combined_dict = {'HeadHunter': hh_instance.load_vacancy(), 'SuperJob': sj_instance.load_vacancy()}
 
     with open('vacancies.json', 'w', encoding='utf-8') as file:
@@ -37,12 +40,12 @@ def job_vacancy():
             for platform, data in combined_dict.items():
                 print(f"\n Платформа: {platform}")
                 for item in data:
-                    print(f"url - {item['url']}\nДолжность - {item['name']}\nЗ.п от - {item['salary_from']}\n"
-                          f"З.п до - {item['salary_to']}\nОписание - {item['responsibility']}\n"
-                          f"Дата - {item['data']}\n")
+                    print(f"id - {item['id']}\nurl - {item['url']}\nДолжность - {item['name']}\n"
+                          f"З.п от - {item['salary_from']}\nЗ.п до - {item['salary_to']}\n"
+                          f"Описание - {item['responsibility']}\nДата - {item['data']}\n")
 
-            a = input('перейти на следующую страницу? y/n ')
-            if a == 'y':
+            user_choice = input('перейти на следующую страницу? y/n ')
+            if user_choice == 'y':
                 page += 1
             else:
                 break
@@ -54,16 +57,24 @@ def job_vacancy():
 
             combined_dict['HeadHunter'] = hh_data
 
-            with open('vacancies.json', 'w', encoding='utf-8') as file:
-                json.dump(combined_dict, file, ensure_ascii=False, indent=2)
-
             for platform in combined_dict['HeadHunter']:
-                print(f"\nurl - {platform['url']}\nДолжность - {platform['name']}\nЗ.п от - {platform['salary_from']}\n"
-                      f"З.п до - {platform['salary_to']}\nОписание - {platform['responsibility']}\n"
-                      f"Дата - {platform['data']}\n")
-            a = input('перейти на следующую страницу? y/n ')
-            if a == 'y':
+                print(f"\nid - {platform['id']}\nurl - {platform['url']}\nДолжность - {platform['name']}\n"
+                      f"З.п от - {platform['salary_from']}\nЗ.п до - {platform['salary_to']}\n"
+                      f"Описание - {platform['responsibility']}\nДата - {platform['data']}\n")
+
+            if not os.path.exists('vacancies.json'):
+                with open('vacancies.json', 'w', encoding='utf-8') as file:
+                    json.dump(data, file, indent=2, ensure_ascii=False)
+
+            user_choice = input('перейти на следующую страницу? y/n ')
+            if user_choice == 'y':
                 page += 1
+                with open('vacancies.json', 'r', encoding='utf-8') as file:
+                    data = json.load(file)
+                    # new_dict = hh_data
+                    data['HeadHunter'].append(hh_data)
+                with open('vacancies.json', 'w', encoding='utf-8') as file:
+                    json.dump(data, file, indent=2, ensure_ascii=False)
             else:
                 break
 
@@ -75,15 +86,20 @@ def job_vacancy():
             combined_dict['SuperJob'] = sj_data
 
             with open('vacancies.json', 'w', encoding='utf-8') as file:
-                json.dump(combined_dict, file, ensure_ascii=False, indent=2)
+                json.dump(sj_data, file, ensure_ascii=False, indent=2)
 
             for platform in combined_dict['SuperJob']:
-                print(f"\nurl - {platform['url']}\nДолжность - {platform['name']}\nЗ.п от - {platform['salary_from']}\n"
-                      f"З.п до - {platform['salary_to']}\nОписание - {platform['responsibility']}\n"
-                      f"Дата - {platform['data']}\n")
+                print(f"\nid - {platform['id']}\nurl - {platform['url']}\nДолжность - {platform['name']}\n"
+                      f"З.п от - {platform['salary_from']}\nЗ.п до - {platform['salary_to']}\n"
+                      f"Описание - {platform['responsibility']}\nДата - {platform['data']}\n")
 
-            a = input('перейти на следующую страницу? y/n ')
-            if a == 'y':
+            user_choice = input('перейти на следующую страницу? y/n ')
+            if user_choice == 'y':
                 page += 1
+                json_file.add_vacancy_sj(sj_data)
             else:
                 break
+
+    user_sort = input('\nВывести топ 5 вакансий по зарплате? y/n ')
+    if user_sort == 'y':
+        print(json_file.load_sorted_vacancies())

@@ -55,6 +55,7 @@ class HeadHunter(Vacancy, APIManager):
         for vacancy in data.get('items', []):
             published_at = datetime.strptime(vacancy['published_at'], "%Y-%m-%dT%H:%M:%S%z")
             vacancy_info = {
+                'id': vacancy['id'],
                 'url': vacancy['alternate_url'],
                 'name': vacancy['name'],
                 'salary_from': vacancy['salary']['from'] if vacancy.get('salary') else None,
@@ -102,14 +103,15 @@ class Super_job(Vacancy, APIManager):
         """
         data = self.get_vacancies()
         vacancy_list_SJ = []
-        for i in data['objects']:
-            published_at = datetime.fromtimestamp(i.get('date_published', ''))
+        for vacancy in data['objects']:
+            published_at = datetime.fromtimestamp(vacancy.get('date_published', ''))
             super_job = {
-                'url': i['link'],
-                'name': i.get('profession', ''),
-                'salary_from': i.get('payment_from', '') if i.get('payment_from') else None,
-                'salary_to': i.get('payment_to') if i.get('payment_to') else None,
-                'responsibility': i.get('candidat').replace('\n', '').replace('•', '') if i.get('candidat') else None,
+                'id': vacancy['id'],
+                'url': vacancy['link'],
+                'name': vacancy.get('profession', ''),
+                'salary_from': vacancy.get('payment_from', '') if vacancy.get('payment_from') else None,
+                'salary_to': vacancy.get('payment_to') if vacancy.get('payment_to') else None,
+                'responsibility': vacancy.get('candidat').replace('\n', '').replace('•', '') if vacancy.get('candidat') else None,
                 'data': published_at.strftime("%d.%m.%Y"),
             }
             vacancy_list_SJ.append(super_job)
