@@ -86,14 +86,6 @@ class JsonSaveFile(SaveToFile):
         with open(f'{self.name_file}.json', 'w') as file:
             json.dump(data_file, file, indent=2, ensure_ascii=False)
 
-    @staticmethod
-    def sort_key(item):
-        '''
-        Ключ для сортировки
-        списка словарей по зарплате
-        '''
-        return item.get('salary_from')
-
     def load_sorted_vacancies(self):
         '''
         Считывает файл json.
@@ -102,7 +94,7 @@ class JsonSaveFile(SaveToFile):
         '''
         with open(f'{self.name_file}.json', 'rt', encoding='utf-8') as file:
             vacancies = json.load(file)
-            sorted_vacancies = sorted(vacancies, key=self.sort_key, reverse=True)
+            sorted_vacancies = sorted(vacancies.items(), key=lambda vacancies: ['salary_from'], reverse=True)
             list_of_five = []
             while len(list_of_five) < 5:
                 for i in sorted_vacancies:
